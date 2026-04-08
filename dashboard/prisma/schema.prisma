@@ -1,0 +1,181 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/* ------------ Power and Perfomace Metrics Starts ------------*/
+
+// Example data: "iOS"
+model Platform {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  categories PerfMetricsCategory[]
+  insights  Insights?
+}
+
+// Example data: "HANG", "LAUNCH", "MEMORY", "DISK", "BATTERY", "TERMINATION", "ANIMATION"
+model PerfMetricsCategory {
+  id         String   @id @default(cuid())
+  identifier String   @unique
+  platform   Platform @relation(fields: [platformId], references: [id])
+  platformId String
+  metrics    MetricsIdentifier[]
+  insights   MetricsInsight[]
+}
+
+// Example data: "hangRate", "launchTime", "peakMemory", "diskWrites", "batteryUsage", "onScreen", "background", "scrollHitchRate"
+model MetricsIdentifier {
+  id          String   @id @default(cuid())
+  identifier  String
+  category    PerfMetricsCategory @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  unit        Unit     @relation(fields: [unitId], references: [id])
+  unitId      String
+  datasets    FilterCriteria[]
+  goalKeys    GoalKey[]
+  insights    MetricsInsight[]
+  
+  @@unique([identifier, categoryId])
+}
+
+// Example data: { "identifier": "hangTime", "displayName": "seconds/hour" }
+model Unit {
+  id          String   @id @default(cuid())
+  identifier  String @unique
+  displayName String
+  metrics     MetricsIdentifier[]
+}
+
+// Example data:
+// "goalKey": "fair",
+// "upperBound": 10,
+// "lowerBound": 5
+model GoalKey {
+  id        String   @id @default(cuid())
+  goalKey   String
+  upperBound Float?
+  lowerBound Float?
+  metric    MetricsIdentifier @relation(fields: [metricId], references: [id])
+  metricId  String
+
+  @@unique([goalKey, metricId])
+}
+
+// Example data:
+// {
+//   "percentile": "percentile.fifty",
+//   "device": "iPad11,1",
+//   "deviceMarketingName": "iPad mini (5th generation)"
+// }
+model FilterCriteria {
+  id                 String   @id @default(cuid())
+  percentile         String
+  device             String
+  deviceMarketingName String
+  metric             MetricsIdentifier @relation(fields: [metricId], references: [id])
+  metricId           String
+  points             DataPoint[]
+
+  @@unique([percentile, device, deviceMarketingName, metricId])
+}
+
+// Example data: { "version": "1.7.13", "value": 6.5, "errorMargin": 10, "goal": "fair" }
+model DataPoint {
+  id           String   @id @default(cuid())
+  version      String
+  value        Float
+  errorMargin  Float?
+  goal         String?
+  dataset      FilterCriteria @relation(fields: [datasetId], references: [id])
+  datasetId    String
+  breakdowns   PercentageBreakdown[]
+
+  @@unique([version, datasetId])
+}
+
+// Example data: { "value": 84, "subSystemLabel": "On Screen" }
+model PercentageBreakdown {
+  id         String   @id @default(cuid())
+  subSystemLabel String
+  value      Float
+  dataPoint  DataPoint @relation(fields: [dataPointId], references: [id])
+  dataPointId String
+
+  @@unique([dataPointId, subSystemLabel])
+}
+
+// Example data: trendingUp[], regressions[]
+model Insights {
+  id              String   @id @default(cuid())
+  platform        Platform @relation(fields: [platformId], references: [id])
+  platformId      String   @unique
+  trendingUp      MetricsInsight[] @relation("TrendingUpInsights")
+  regressions     MetricsInsight[] @relation("RegressionInsights")
+}
+
+// Example data:
+// {
+//   "metricCategory": "DISK",
+//   "metric": "diskWrites",
+//   "latestVersion": "1.7.41",
+//   "summaryString": "Top (90th percentile) Disk Writes trended up...",
+//   "referenceVersions": ["1.7.33", "1.7.37", "1.7.38", "1.7.39"],
+//   "maxLatestVersionValue": 1180.1,
+//   "subSystemLabel": "Processing",
+//   "highImpact": false
+// }
+model MetricsInsight {
+  id                    String   @id @default(cuid())
+  metricCategory        PerfMetricsCategory @relation(fields: [metricCategoryId], references: [id])
+  metricCategoryId      String
+  metric                MetricsIdentifier @relation(fields: [metricId], references: [id])
+  metricId              String
+  latestVersion         String
+  summaryString         String
+  referenceVersions     Json
+  referenceVersionsKey  String
+  maxLatestVersionValue Float
+  subSystemLabel        String?
+  highImpact            Boolean?
+  insightType           InsightType
+
+  insightsTrendingUp    Insights? @relation("TrendingUpInsights", fields: [insightsId], references: [id], map: "MetricsInsight_trendingUp_fkey")
+  insightsRegressions   Insights? @relation("RegressionInsights", fields: [insightsId], references: [id], map: "MetricsInsight_regressions_fkey")
+  insightsId            String
+
+
+  populations           InsightPopulation[]
+
+  @@unique([metricCategoryId, metricId, latestVersion, insightType, insightsId, referenceVersionsKey])
+}
+
+enum InsightType {
+  TRENDING_UP
+  REGRESSION
+}
+
+// Example data: { "percentile": "percentile.ninety", "latestVersionValue": 1059.7, "device": "all_iphones", "deltaPercentage": 16, "referenceAverageValue": 0.32, "summaryString": "Increased 16% across iPhone (All)" }
+model InsightPopulation {
+  id                  String   @id @default(cuid())
+  percentile          String
+  latestVersionValue  Float
+  device              String
+  deltaPercentage     Float?
+  referenceAverageValue Float?
+  summaryString       String?
+  insight             MetricsInsight @relation(fields: [insightId], references: [id])
+  insightId           String
+
+  @@unique([percentile, device, insightId])
+}
+
+/* ------------ Power and Perfomace Metrics Ends ------------*/
+

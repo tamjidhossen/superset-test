@@ -1,0 +1,68 @@
+{
+    "productData": [
+        {
+            "platform": "iOS",
+            "metricCategories": [
+                {
+                    "identifier": "ANIMATION",
+                    "metrics": [
+                        {
+                            "identifier": "scrollHitchRate",
+                            "unit": {
+                                "identifier": "scrollHitchRate",
+                                "displayName": "%"
+                            },
+                            "datasets": [
+                                {
+                                    "filterCriteria": {
+                                        "percentile": "percentile.fifty",
+                                        "device": "all_ipads",
+                                        "deviceMarketingName": "All iPads"
+                                    },
+                                    "points": [
+                                        {
+                                            "version": "10.0",
+                                            "value": 6.5,
+                                            "goal": "fair"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "filterCriteria": {
+                                        "percentile": "percentile.ninety",
+                                        "device": "all_ipads",
+                                        "deviceMarketingName": "All iPads"
+                                    },
+                                    "points": [
+                                        {
+                                            "version": "10.0",
+                                            "value": 29.7,
+                                            "goal": "poor"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "goalKeys": [
+                                {
+                                    "goalKey": "poor",
+                                    "lowerBound": 10
+                                },
+                                {
+                                    "upperBound": 10,
+                                    "goalKey": "fair",
+                                    "lowerBound": 5
+                                },
+                                {
+                                    "upperBound": 5,
+                                    "goalKey": "good",
+                                    "lowerBound": 0
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "version": "1.0.0"
+}
