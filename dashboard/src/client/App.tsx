@@ -4,6 +4,7 @@ import SupersetDashboard from "./components/SupersetDashboard";
 import "./index.css";
 
 const App = () => {
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{ message: string; type: "success" | "error" | "" }>({
     message: "",
@@ -30,19 +31,66 @@ const App = () => {
     }
   };
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case "dashboard":
+        return <SupersetDashboard />;
+      case "sqllab":
+        return (
+          <iframe 
+            src="http://localhost:8088/sqllab/?standalone=true" 
+            className="full-iframe"
+            title="SQL Lab"
+          />
+        );
+      case "explorer":
+        return (
+          <iframe 
+            src="http://localhost:8088/chart/add?standalone=true" 
+            className="full-iframe"
+            title="Chart Builder"
+          />
+        );
+
+      default:
+        return <SupersetDashboard />;
+    }
+  };
+
   return (
     <div className="app-container">
       <div className="sidebar">
-        <div className="sidebar-header">App Store Metrics</div>
-        <div className="nav-item active">📊 Superset View</div>
+        <div className="sidebar-header">Data Pro</div>
+        <div 
+          className={`nav-item ${activeTab === "dashboard" ? "active" : ""}`}
+          onClick={() => setActiveTab("dashboard")}
+        >
+          📊 Dashboard
+        </div>
+        <div 
+          className={`nav-item ${activeTab === "sqllab" ? "active" : ""}`}
+          onClick={() => setActiveTab("sqllab")}
+        >
+          💻 SQL Lab
+        </div>
+        <div 
+          className={`nav-item ${activeTab === "explorer" ? "active" : ""}`}
+          onClick={() => setActiveTab("explorer")}
+        >
+          🎨 Chart Builder
+        </div>
       </div>
       
       <div className="main-content">
         <div className="header">
-          <h1>Superset Visualization</h1>
+          <h1>{
+            activeTab === "dashboard" ? "Metrics Dashboard" : 
+            activeTab === "sqllab" ? "SQL Lab (Raw Data)" : 
+            "Chart Explorer"
+          }</h1>
           <div>
             <button className="btn-seed" onClick={handleSeed} disabled={loading}>
-              {loading ? "Seeding..." : "Insert Dummy Data to DB"}
+              {loading ? "Seeding..." : "Quick Seed DB"}
             </button>
             {status.message && (
               <div className={`status-message status-${status.type}`}>
@@ -52,8 +100,8 @@ const App = () => {
           </div>
         </div>
         
-        <div className="card" style={{ padding: 0 }}>
-          <SupersetDashboard />
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          {renderContent()}
         </div>
       </div>
     </div>
