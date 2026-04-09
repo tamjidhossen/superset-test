@@ -149,9 +149,11 @@ TALISMAN_ENABLED = False
 OVERRIDE_HTTP_HEADERS = {"X-Frame-Options": "ALLOWALL"}
 
 # Allow session cookies to work inside iframes (Required for SQL Lab / Chart Builder)
-SESSION_COOKIE_SAMESITE = "None"
-SESSION_COOKIE_SECURE = False  # Set to True if using HTTPS
+# We use 'Lax' on localhost so the browser can accurately clear the cookie on logout
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_HTTPONLY = True
+
 
 
 #
