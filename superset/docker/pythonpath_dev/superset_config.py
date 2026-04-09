@@ -160,3 +160,9 @@ SESSION_COOKIE_HTTPONLY = True
 #
 try:
     import superset_config_docker
+    from superset_config_docker import *  # noqa: F403
+    logger.info(
+        f"Loaded your Docker configuration at [{superset_config_docker.__file__}]"
+    )
+except ImportError:
+    logger.info("Using default Docker config...")
