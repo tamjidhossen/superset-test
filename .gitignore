@@ -1,0 +1,13 @@
+# Core ignores
+node_modules/
+.env
+*.log
+dist/
+build/
+.DS_Store
+
+# Superset specific ignores for Push Protection
+# Exclude demo storybooks and payload data that contain dummy secrets
+superset/superset-frontend/packages/superset-ui-demo/
+# Exclude specific docs with dummy credentials
+superset/superset/db_engine_specs/README.md
