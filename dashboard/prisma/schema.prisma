@@ -179,3 +179,10 @@ model InsightPopulation {
 
 /* ------------ Power and Perfomace Metrics Ends ------------*/
 
+model User {
+  id         String   @id @default(cuid())
+  username   String   @unique
+  password   String
+  createdAt  DateTime @default(now())
+}
+

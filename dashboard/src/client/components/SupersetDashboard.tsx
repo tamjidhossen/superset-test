@@ -12,7 +12,11 @@ const SupersetDashboard = () => {
       try {
         setError(null);
         // 1. Fetch Guest Token and Metadata from our backend
-        const response = await fetch("http://localhost:5000/api/superset/guest-token");
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:5000/api/superset/guest-token", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
         if (!response.ok) throw new Error("Backend connection failed (Port 5000)");
         
         const { guestToken, embeddedId } = await response.json();

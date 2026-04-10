@@ -11,3 +11,7 @@ build/
 superset/superset-frontend/packages/superset-ui-demo/
 # Exclude specific docs with dummy credentials
 superset/superset/db_engine_specs/README.md
+
+data
+/data
+data/
